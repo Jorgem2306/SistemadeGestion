@@ -1,0 +1,40 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Tabla de Comerciantes 
+model Comerciante {
+  id             Int                 @id @default(autoincrement())
+  dni            String              @unique
+  nombre         String
+  telefono       String
+  fechaRegistro  DateTime            @default(now())
+  puestos        Puesto[]            // Relación 1 a muchos con Puestos
+  cargamentos    MercaderiaIngreso[] // Relación 1 a muchos con Cargamentos
+}
+
+// 2. Tabla de Puestos 
+model Puesto {
+  id             Int          @id @default(autoincrement())
+  numero         String       @unique
+  sector         String       // Frutas, Verduras, Tubérculos
+  estado         String       @default("DISPONIBLE") // DISPONIBLE, OCUPADO
+  comercianteId  Int?
+  comerciante    Comerciante? @relation(fields: [comercianteId], references: [id], onDelete: SetNull)
+}
+
+// 3. Tabla de Control de Mercadería 
+model MercaderiaIngreso {
+  id                Int          @id @default(autoincrement())
+  placaCamion       String
+  tipoProducto      String
+  tonelaje          Decimal      @db.Decimal(5, 2)
+  tarifaCalculada   Decimal      @db.Decimal(7, 2)
+  fechaIngreso      DateTime     @default(now())
+  comercianteId     Int
+  comerciante       Comerciante  @relation(fields: [comercianteId], references: [id], onDelete: Cascade)
+}
